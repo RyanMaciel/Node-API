@@ -182,7 +182,24 @@ exports.testUpdate = function(test){
 
 	});
 
-	addErrHandler(test, get, "Get request encountered error.");
+	addErrHandler(test, get, "Get request encountered error");
 
 }
 
+//Test the message index. This only tests for existance. A more detailed test might be needed.
+exports.testIndex = function(test){
+	var get = http.get("http://localhost:3000/messages/index", function(res){
+
+		addErrHandler(test, res, "Get response encountered error");
+
+		res.on("data", function(data){
+			test.ok(data, "Index Data returned false");
+			test.equal(res.statusCode, 200, "Response did not return 200 status code");
+			test.done();
+		});
+
+	});
+
+	addErrHandler(test, get, "Get request encountered error");
+
+}

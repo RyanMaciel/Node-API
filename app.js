@@ -3,7 +3,23 @@ var app = express();
 
 var messages = ["test", "hi!", "test"];
 
-app.get('/messages/:id', function (req, res) {
+app.get("/messages/index", function (req, res){
+  //output a comma-delimeted list of messages.
+
+  var returnString = ""
+  for(var i = 0; i < messages.length; i++){
+    if(i = messages.length-1){
+      returnString += messages[i];
+      break;
+    }
+    returnString += (messages[i] + ",");
+
+  }
+  res.send(200, returnString);
+
+});
+
+app.get("/messages/:id", function (req, res) {
 
   if(idValid(req.params.id)){
     res.send(200, messages[req.params.id]);
@@ -15,7 +31,7 @@ app.get('/messages/:id', function (req, res) {
 
 
 //Handle a new message post.
-app.post('/messages/', function (req, res){
+app.post("/messages/", function (req, res){
   req.setEncoding("utf8");
   req.on("data", function(data){
     
