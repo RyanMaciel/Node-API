@@ -1,7 +1,7 @@
 
 var http = require("http")
 var app = require("../app")
-
+var url = require("url")
 
 function addErrHandler(test, object, message){
 	object.on("error", function(e){
@@ -202,4 +202,33 @@ exports.testIndex = function(test){
 
 	addErrHandler(test, get, "Get request encountered error");
 
+}
+
+exports.testDistances = function(test){
+
+	testCoordDistances([["1.0","1.0"],["1.0","1.0"]], 0, test, "Distance between same points was not 0");
+	testCoordDistances([["10.0", "10.0"],["20.0", "20.0"]], 1545242, test, "Distance was incorrect");
+}
+
+function testCoordDistances(coords, expectedDistance, test, message){
+
+	var lat1 = coords[0][0];
+	var long1 = coords[0][1];
+	var lat2 = coords[1][0];
+	var long2 = coords[1][1];
+
+	var distanceURL = url.parse("http://localhost:3000/distances/");
+	distanceURL.query = {"lat1": lat1, "long1": long1, "lat2":lat2, "long2":long2};
+	console.log(url.format(distanceURL));
+	var get = http.get(url.format(distanceURL), function(res){
+		res.setEncoding("utf8");
+
+		addErrHandler(test, res, "Get response encountered error");
+
+		res.on("data", function(data){
+			test.equal(data, expectedDistance, message);
+			test.done();
+		});
+	});
+	addErrHandler(test, get, "Get request encountered error");
 }

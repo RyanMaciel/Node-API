@@ -3,6 +3,26 @@ var app = express();
 
 var messages = ["test", "hi!", "test"];
 
+function haversine(lat1, long1, lat2, long2){
+  var dlat = lat2 - lat1;
+  var dlong = long2 - long1;
+
+  var R = 3961; //approx radius of the world in miles
+
+  var a = Math.pow((Math.sin(dlat/2)), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow((Math.sin(dlong/2)), 2);
+  var c = 2 * Math.atan2(Math.pow(a, 0.5), Math.pow((1-a), 0.5));
+  var d = R * c;
+
+  return d;
+}
+
+//implement a haversine function
+app.get("/distances/", function(req, res){
+  var d = haversine(parseFloat(req.query.lat1), parseFloat(req.query.long1), parseFloat(req.query.lat2), parseFloat(req.query.long2));
+  res.send(200, d.toString());
+
+});
+
 app.get("/messages/index", function (req, res){
   //output a comma-delimeted list of messages.
 
