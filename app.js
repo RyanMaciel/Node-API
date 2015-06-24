@@ -4,10 +4,9 @@ var app = express();
 var messages = ["test", "hi!", "test"];
 
 app.get('/messages/:id', function (req, res) {
-  var id = req.params.id;
-  console.log(id)
-  if(messages[id] != null && messages[id] != null){
-    res.send(200, messages[id]);
+
+  if(idValid(req.params.id)){
+    res.send(200, messages[req.params.id]);
   }else{
 
     res.send(404, "message not found :(");
@@ -30,17 +29,38 @@ app.post('/messages/', function (req, res){
 
 //Handle the deletion of a message.
 app.delete("/messages/:id", function (req, res){
-  var id = req.params.id
 
-  if(id != null){
-    messages[id] = null;
+  if(idValid(req.params.id)){
+    messages[req.params.id] = null;
     res.send(204);
   }else{
-    res.send(400, "Bad request :(");
+     res.send(404, "message not found :(");
   }
 
 });
 
+app.put("/messages/:id", function (req, res){
+  if(idValid(req.params.id)){
+
+    req.setEncoding("utf8");
+    req.on("data", function(data){
+      messages[req.params.id];
+
+    })
+
+  }else{
+     res.send(404, "message not found :(");
+
+  }
+
+});
+
+function idValid(id){
+  if(id != null && messages[id] != null){
+    return true;
+  }
+  return false;
+}
 
 var server = app.listen(3000, function () {
 
