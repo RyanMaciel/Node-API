@@ -2,30 +2,26 @@
 var http = require("http")
 var app = require("../app")
 
-exports.testSomething = function(test){
-    test.expect(1);
-    test.ok(true, "this assertion should pass");
-    test.done();
-};
 
-
+//Test that the Get method will return the correct value. 
+//The value of /messages/0 will be "test" at the intialization of the server.
 exports.testGet = function(test){
-	http.get("localhost:3000/messages/0", function(res){
+	http.get("http://localhost:3000/messages/0", function(res){
 	
 		//Handle result error.
-		res.on("error", function(error){
-			test.ifError(error);
+		res.on("error", function(e){
+			test.ok(false, "Get response encountered error: " + e.message);
 			test.done();
 		});
 
 		res.on("data", function(data){
 
-
+			test.equal(data, "test", "Get failed to return the correct value.");
+			test.done();
 		});
 
 	}).on('error', function(e) {
-			console.log("Got error: " + e.message);
-			test.ifError(error);
+			test.ok(false, "Get request encountered error: " + e.message);
 			test.done();
 	});
 
@@ -57,8 +53,7 @@ exports.testPost = function(test){
 
 		//Handle error
 		res.on("error", function(error){
-			console.log("Got error: " + error.message);
-			test.ifError(error);
+			test.ok(false, "Post response encountered error: " + e.message)
 			test.done();
 		});
 
@@ -82,20 +77,19 @@ exports.testPost = function(test){
 
 				//Handle get data
 				result.on("data", function(data){
-					test.equal(data, post_message)
+					test.equal(data, post_message, "Post method failed to post the message correctly.")
 					test.done();
 				});
 
 				//Handle result error.
-				result.on("error", function(error){
-					test.ifError(error);
+				result.on("error", function(e){
+					test.ok(false, "Get response encountered error: " + e.message);
 					test.done();
 				});
 
 				//Handle request error.
 			}).on('error', function(e) {
- 				console.log("Got error: " + e.message);
- 				test.ifError(error);
+ 				test.ok(false, "Get request encountered error: " + e.message);
  				test.done();
 			});
 
@@ -103,10 +97,52 @@ exports.testPost = function(test){
 	});
 
 	req.on('error', function(e) {
-  test.ifError(error);
-  test.done();
+		test.ok(false, "Post request encountered error: " + e.message);
+		test.done();
 	});
 
 	req.write(post_message);
 	req.end();
+}
+
+
+exports.testDelete = function(test){
+
+	//These options will cause DELETE to be sent to /messages/0
+	var options = {
+	  hostname: 'localhost',
+	  path: '/messages/0',
+	  port: '3000',
+	  method: 'DELETE',
+	};
+
+	//Send the DELETE
+	var req = http.request(options, function(res){
+		
+		res.on("error", function(e){
+			test.ok(false, "Delete response encountered error: " + e.message);
+			test.done();
+		});
+
+	}).on('error', function(e) {
+ 	 test.ok(false, "Delete request encountered error: " + e.message);
+ 	 test.done();
+	});
+
+	req.end();
+
+	//Send a get request to make sure that the message has been deleted.
+	http.get("http://localhost:3000/messages/0", function(res){
+		res.on("error", function(e){
+			test.ok(false, "Get request encountered error: " + e.message);
+			test.done();
+		});
+
+		res.on("data", function(data){
+			test.equal(res.statusCode, 404, "Get Request did not return a 404 message");
+			test.done();
+		});
+	});
+
+
 }
